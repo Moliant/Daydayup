@@ -1,9 +1,10 @@
 package com.im.optional;
 
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.ObjectUtils;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @SpringBootTest
@@ -146,7 +147,100 @@ public class OptionalTest {
         System.out.println(res);
     }
 
-    //TODO
+    //TODO  orElseThrow()  方法作用是如果实例包含非空值，返回这个值；否则，它会执行作为参数传入的异常类。
+    @Test
+    public void orElseThrowTest() {
+        Optional.ofNullable(null).orElseThrow( () -> new RuntimeException("error"));
+    }
+
+    @Test
+    public void Combat() {
+        User user = new User();
+       String hobbyName = "";
+       user.setHobby(new Hobby(1L,"hobbyName"));
+
+        if(ObjectUtils.isEmpty(user)){
+            if (ObjectUtils.isEmpty(user.getHobby())) {
+                hobbyName =  user.getHobby().getName();
+            }
+        }
+
+       //Optional 写法
+        String hobbbyName = Optional.ofNullable(user)
+                .map(User::getHobby)
+                .map(Hobby::getName)
+                .orElse("empty hobby");
+
+        System.out.println(hobbbyName);
+    }
+
+
+    @Data
+    public class User {
+        private Long id;
+        private String name;
+        private Integer age;
+        private String email;
+        private Hobby hobby;
+    }
+
+    @Data
+    public class Hobby {
+        private Long hobbyId;
+        private String name;
+
+        public Hobby(long l, String hobbyName) {
+            this.hobbyId = l;
+            this.name = hobbyName;
+        }
+    }
+
+    public String getName(User user)  throws Exception{
+        if(user!=null){
+            if(user.getHobby()!=null){
+                Hobby hobby = user.getHobby();
+                if(hobby.getName()!=null){
+                    return hobby.getName();
+                }
+            }
+        }
+        throw new RuntimeException("取值错误");
+    }
+    public String getNameFor(User user)  throws Exception{
+        return Optional.ofNullable(user).map(User::getHobby).map(Hobby::getName).orElseThrow(() -> new RuntimeException("NPE"));
+    }
+
+
+    // 查看源码   Optional、 of()、 ofNullable()、
+    @Test
+    public void test2(User user) {
+        Optional.of(user).get();
+        Optional.ofNullable(user).get();
+    }
+
+    public User getUser(User user) throws Exception{
+        if(user!=null){
+            String name = user.getName();
+            if("zhangsan".equals(name)){
+                return user;
+            }
+        }else{
+            user = new User();
+            user.setName("zhangsan");
+            return user;
+        }
+        return null;
+    }
+
+    public User getUserFor(User user) throws Exception{
+        return Optional.ofNullable(user)
+                .filter(u -> "zhangshurnang".equals(user.getName()))
+                .orElseGet(() -> {
+                    User user1 = new User();
+                    user1.setName("zhangsan");
+                    return user1;
+                });
+    }
 
 
 
@@ -155,8 +249,4 @@ public class OptionalTest {
 
 
 
-
-
-
-
-}
+    }
